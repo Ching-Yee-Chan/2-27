@@ -1,6 +1,7 @@
 #include <iostream>
 #include<fstream>
-#include<windows.h>
+#include<sys/time.h>
+const double INTERVAL = 600;
 typedef long long ll;
 using namespace std;
 const int N = 4e8;
@@ -46,13 +47,19 @@ void init(int n)
 }
 void timing(void (*func)(int), int n)
 {
-    ll head, tail, freq;
-    QueryPerformanceFrequency((LARGE_INTEGER *)&freq);
-    QueryPerformanceCounter((LARGE_INTEGER *)&head);
-    func(n);
-    QueryPerformanceCounter((LARGE_INTEGER *)&tail);
-    outfile<<(tail-head)*1000.0/freq<<",";
-    cout<<(tail-head)*1000.0/freq<<'\t';
+    timeval tv_begin, tv_end;
+    int counter(0);
+    gettimeofday(&tv_begin, 0);
+    double time = 0;
+    while(INTERVAL>time)
+    {
+        func(n);
+        gettimeofday(&tv_end, 0);
+        counter++;
+        time = ((ll)tv_end.tv_sec - (ll)tv_begin.tv_sec)*1000.0 + ((ll)tv_end.tv_usec - (ll)tv_begin.tv_usec)/1000.0;
+    }
+    outfile<<time/counter<<","<<counter<<",";
+    cout<<time/counter<<","<<counter<<'\t';
 }
 int main()
 {
